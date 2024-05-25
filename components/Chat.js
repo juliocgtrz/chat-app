@@ -1,13 +1,14 @@
 import { Bubble, GiftedChat } from 'react-native-gifted-chat';
 import { useState, useEffect } from 'react';
-import { StyleSheet, View, Text, KeyboardAvoidingView, Platform } from 'react-native';
+import { StyleSheet, View, KeyboardAvoidingView, Platform } from 'react-native';
+import { collection, addDoc, onSnapshot, query, orderBy } from 'firebase/firestore';
 
-const Chat = ({ route, navigation }) => {
-    const { username, background } = route.params;
+const Chat = ({ route, navigation, db }) => {
+    const { username, background, userID } = route.params;
     const [messages, setMessages] = useState([]);
     const onSend = (newMessages) => {
-        setMessages(previousMessages => GiftedChat.append(previousMessages, newMessages))
-    }
+        addDoc(collection(db, "messages"), newMessages[0]);
+    };
     const renderBubble = (props) => {
         return <Bubble
             {...props}
@@ -23,34 +24,21 @@ const Chat = ({ route, navigation }) => {
     }
 
     useEffect(() => {
-        setMessages([
-            {
-                _id: 1,
-                text: "Hello developer",
-                createdAt: new Date(),
-                user: {
-                    _id: 2,
-                    name: "React Native",
-                    avatar: "https://placeimg.com/140/140/any",
-                },
-                // Marks the message as sent, shows one tick
-                sent: true,
-                // Marks the message as received, shows two ticks
-                received: true,
-                // Marks the message as pending with a clock loader
-                pending: true,
-            },
-            {
-                _id: 2,
-                text: "You've entered the chat",
-                createdAt: new Date(),
-                system: true,
-            },
-        ]);
-    }, []);
-
-    useEffect(() => {
         navigation.setOptions({ title: username });
+        // create a query to get the "messages" collection from the Firestore database
+        const q = query(collection(db, "messages"), orderBy("createdAt", "desc"));
+        // this function will be called whenever there are changes in the collection
+        const unsubMessages = onSnapshot(q, (documentsSnapshot) => {
+            let newMessages = [];
+            documentsSnapshot.forEach(doc => {
+                newMessages.push({ id: doc.id, ...doc.data(), createdAt: new Date(doc.data().createdAt.toMillis())})
+            });
+            setMessages(newMessages);
+        })
+        // clean up code
+        return () => {
+            if (unsubMessages) unsubMessages();
+        }
     }, []);
 
     return (
@@ -60,7 +48,8 @@ const Chat = ({ route, navigation }) => {
                 renderBubble={renderBubble}
                 onSend={messages => onSend(messages)}
                 user={{
-                    _id: 1
+                    _id: userID,
+                    name: username,
                 }}
             />
             { Platform.OS === 'android' ? <KeyboardAvoidingView behavior='height' /> : null }
