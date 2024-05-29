@@ -1,11 +1,14 @@
 import { TouchableOpacity, Text, View, StyleSheet, Alert } from "react-native";
+// import all props of ImagePicker
 import * as ImagePicker from 'expo-image-picker';
+// import all props of Location
 import * as Location from 'expo-location';
 import { useActionSheet } from '@expo/react-native-action-sheet';
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 
 const CustomActions = ({ wrapperStyle, iconTextStyle, onSend, storage, userID }) => {
     const actionSheet = useActionSheet();
+    // function to open plus menu next to input text for media options
     const onActionPress = () => {
         const options = ['Choose From Library', 'Take Picture', 'Send Location', 'Cancel'];
         const cancelButtonIndex = options.length - 1;
@@ -30,7 +33,7 @@ const CustomActions = ({ wrapperStyle, iconTextStyle, onSend, storage, userID })
             },
         );
     };
-
+    // pick an image from the library on the device
     const pickImage = async () => {
         let permissions = await ImagePicker.requestMediaLibraryPermissionsAsync();
         if (permissions?.granted) {
@@ -39,7 +42,7 @@ const CustomActions = ({ wrapperStyle, iconTextStyle, onSend, storage, userID })
             else Alert.alert("Permissions haven't been granted.");
         }
     }
-
+    // take a photo with the device's camera and upload
     const takePhoto = async () => {
         let permissions = await ImagePicker.requestCameraPermissionsAsync();
         if (permissions?.granted) {
@@ -48,7 +51,7 @@ const CustomActions = ({ wrapperStyle, iconTextStyle, onSend, storage, userID })
             else Alert.alert("Permissions haven't been granted.");
         }
     }
-
+    // share geolocation
     const getLocation = async () => {
         let permissions = await Location.requestForegroundPermissionsAsync();
         if (permissions?.granted) {
@@ -69,7 +72,7 @@ const CustomActions = ({ wrapperStyle, iconTextStyle, onSend, storage, userID })
         const imageName = uri.split("/")[uri.split("/").length - 1];
         return `${userID}-${timeStamp}-${imageName}`;
     }
-
+    // upload images to cloud storage
     const uploadAndSendImage = async (imageURI) => {
         const uniqueRefString = generateReference(imageURI);
         const newUploadRef = ref(storage, uniqueRefString);

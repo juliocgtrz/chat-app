@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { StyleSheet, View, Text, TextInput, ImageBackground, TouchableOpacity, Alert } from 'react-native';
 import { getAuth, signInAnonymously } from "firebase/auth";
-
+// create navigation
 const Start = ({ navigation }) => {
+    // states to update username and select background color
     const [username, setUsername] = useState('');
     const [background, setBackground] = useState('');
     

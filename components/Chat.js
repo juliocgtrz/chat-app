@@ -7,11 +7,13 @@ import CustomActions from './CustomActions';
 import MapView from 'react-native-maps';
 
 const Chat = ({ route, navigation, db, isConnected, storage }) => {
+    // passed from start screen
     const { username, background, userID } = route.params;
     const [messages, setMessages] = useState([]);
     const onSend = (newMessages) => {
         addDoc(collection(db, "messages"), newMessages[0]);
     };
+    // customize colors of sender and receiver chat bubbles
     const renderBubble = (props) => {
         return <Bubble
             {...props}
@@ -29,10 +31,11 @@ const Chat = ({ route, navigation, db, isConnected, storage }) => {
         if (isConnected) return <InputToolbar {...props} />;
         else return null;
     }
-
+    // declared here to avoid being only accessible within if block
     let unsubMessages;
     useEffect(() => {
         if (isConnected === true) {
+            // unregister current onSnapshot() listener to avoid registering multiple listeners when useEffect code is reexecuted
             if (unsubMessages) unsubMessages();
             unsubMessages = null;
             navigation.setOptions({ title: username });
@@ -53,7 +56,7 @@ const Chat = ({ route, navigation, db, isConnected, storage }) => {
             if (unsubMessages) unsubMessages();
         }
     }, [isConnected]);
-
+    // create cache messages
     const cacheMessages = async (messagesToCache) => {
         try {
             await AsyncStorage.setItem(
@@ -64,7 +67,7 @@ const Chat = ({ route, navigation, db, isConnected, storage }) => {
             console.log(error.message);
         }
     }
-
+    // load cached messages from storage
     const loadCachedMessages = async () => {
         const cachedMessages = await AsyncStorage.getItem("messages") || [];
         setMessages(JSON.parse(cachedMessages));
@@ -73,7 +76,7 @@ const Chat = ({ route, navigation, db, isConnected, storage }) => {
     const renderCustomActions = (props) => {
         return <CustomActions storage={storage} {...props} />;
     };
-
+    // custom view for geolocation
     const renderCustomView = (props) => {
         const { currentMessage } = props;
         if (currentMessage.location) {
