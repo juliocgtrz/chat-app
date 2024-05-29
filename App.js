@@ -2,6 +2,7 @@
 import Start from './components/Start';
 import Chat from './components/Chat';
 import { useEffect } from 'react';
+import { getStorage } from "firebase/storage";
 
 // real-time network connectivity detection
 import { useNetInfo } from '@react-native-community/netinfo';
@@ -35,6 +36,7 @@ const App = () => {
 
   // initialize Cloud Firestore and get a reference to the service
   const db = getFirestore(app);
+  const storage = getStorage(app);
 
   const connectionStatus = useNetInfo();
 
@@ -55,7 +57,12 @@ const App = () => {
           component={Start}
         />
         <Stack.Screen name="Chat">
-          {props => <Chat isConnected={connectionStatus.isConnected} db={db} {...props} />}
+          {props => <Chat
+            isConnected={connectionStatus.isConnected}
+            db={db}
+            storage={storage}
+            {...props}
+          />}
         </Stack.Screen>
       </Stack.Navigator>
     </NavigationContainer>
