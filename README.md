@@ -14,7 +14,7 @@ To build a chat app for mobile devices using React Native. The app will provide 
   <li>React Native</li>
   <li>Expo</li>
   <li>Google Firebase</li>
-  <li>Android Studio/li>
+  <li>Android Studio</li>
 </ul>
 
 <h2>Dependencies</h2>
